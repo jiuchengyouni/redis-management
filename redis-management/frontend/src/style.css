@@ -1,0 +1,22 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+html {
+    background-color: white;
+}
+.item{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+.my-item{
+    color: #303133;
+    background-color: #95d475;
+    padding: 7px 14px;
+}
+.my-select-item{
+    color: #606266;
+    background-color: #95d475;
+    padding: 7px 14px;
+}
