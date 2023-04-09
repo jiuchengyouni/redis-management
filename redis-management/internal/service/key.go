@@ -68,25 +68,70 @@ func GetKeyValue(req *define.KeyValueRequest) (*define.KeyValueReply, error) {
 		TLSConfig:       nil,
 		Limiter:         nil,
 	})
-	//获取类型
 	_type, err := rdb.Type(context.Background(), req.Key).Result()
 	if err != nil {
 		return nil, err
 	}
-	//目前只针对string类型
-	v, err := rdb.Get(context.Background(), req.Key).Result()
-	if err != nil {
-		return nil, err
+	var reply = &define.KeyValueReply{
+		Type: _type,
 	}
+	if _type == "string" {
+		v, err := rdb.Get(context.Background(), req.Key).Result()
+		if err != nil {
+			return nil, err
+		}
+		reply.Value = v
+	} else if _type == "hash" {
+		keys, _, err := rdb.HScan(context.Background(), req.Key, 0, "", define.MaxHashLen).Result()
+		if err != nil {
+			return nil, err
+		}
+		data := make([]*define.KeyValue, 0, len(keys)/2)
+		for i := 0; i < len(keys); i += 2 {
+			data = append(data, &define.KeyValue{
+				Key:   keys[i],
+				Value: keys[i+1],
+			})
+		}
+		reply.Value = data
+	} else if _type == "list" {
+		list, err := rdb.LRange(context.Background(), req.Key, 0, define.MaxListLen-1).Result()
+		if err != nil {
+			return nil, err
+		}
+		data := make([]*define.KeyValue, 0, len(list))
+		for i := 0; i < len(list); i++ {
+			data = append(data, &define.KeyValue{
+				Value: list[i],
+			})
+		}
+		reply.Value = data
+	} else if _type == "set" {
+		sets, _, err := rdb.SScan(context.Background(), req.Key, 0, "", define.MaxSetLen).Result()
+		if err != nil {
+			return nil, err
+		}
+		data := make([]*define.KeyValue, 0, len(sets))
+		for i := 0; i < len(sets); i++ {
+			data = append(data, &define.KeyValue{
+				Value: sets[i],
+			})
+		}
+		reply.Value = data
+	} else if _type == "zset" {
+		z, err := rdb.ZRevRangeWithScores(context.Background(), req.Key, 0, define.MaxZSetLen-1).Result()
+		if err != nil {
+			return nil, err
+		}
+		reply.Value = z
+	}
+
 	ttl, err := rdb.TTL(context.Background(), req.Key).Result()
 	if err != nil {
 		return nil, err
 	}
-	return &define.KeyValueReply{
-		Value: v,
-		TTL:   ttl,
-		Type:  _type,
-	}, nil
+	reply.TTL = ttl
+	return reply, nil
 }
 
 func CreateKeyValue(req *define.CreateKeyValueRequest) error {

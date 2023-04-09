@@ -24,6 +24,20 @@
         <el-form-item label="密码">
           <el-input placeholder="请输入密码" type="password" v-model="form.password" />
         </el-form-item>
+        <div v-show="form.type === 'ssh'">
+          <el-form-item label="SSH 地址">
+            <el-input placeholder="请输入 SSH 地址" v-model="form.ssh_addr" />
+          </el-form-item>
+          <el-form-item label="SSH 端口号">
+            <el-input placeholder="请输入 SSH 端口号" v-model="form.ssh_port" />
+          </el-form-item>
+          <el-form-item label="SSH 用户名">
+            <el-input placeholder="请输入 SSH 用户名" v-model="form.ssh_username" />
+          </el-form-item>
+          <el-form-item label="SSH 密码">
+            <el-input placeholder="请输入 SSH 密码" type="password" v-model="form.ssh_password" />
+          </el-form-item>
+        </div>
         <el-form-item>
           <el-button v-if="data===undefined" type="primary" @click="createConnection">创建连接</el-button>
           <el-button v-else type="primary" @click="editConnection">编辑连接</el-button>
@@ -38,7 +52,6 @@ import {ref,reactive} from "vue"
 import {ConnectionCreate} from "../../wailsjs/go/main/App.js";
 import {ConnectionEdit} from "../../wailsjs/go/main/App.js";
 import {ElNotification} from "element-plus";
-
 let props=defineProps(['title','btnType','data'])
 const dialogVisible = ref(false)
 const emit=defineEmits(['emit-connection-list'])

@@ -140,12 +140,12 @@ function createKey(){
 <style scoped>
 .key-item{
   color: #303133;
-  background-color: #cfd9df;
+  background-color: #79bbff;
   padding: 7px 14px;
 }
 .key-select-item{
   color: #606266;
-  background-color: #95d475;
-  padding: 6px;
+  background-color: #cfd9df;
+  padding: 7px 14px;
 }
 </style>
